@@ -1,0 +1,6 @@
+#!/bin/sh
+
+set -eu
+
+DEBIAN_FRONTEND=noninteractive apt-get -yq clean
+chsh --shell '/usr/sbin/nologin' packer

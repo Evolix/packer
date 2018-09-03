@@ -1,0 +1,77 @@
+#!/bin/sh
+
+set -eu
+
+error() {
+    echo "${1:-}" >&2
+    exit 1
+}
+
+list_templates() {
+    cd ansible
+    for template in *.yml; do
+        printf "${template%.yml}\n"
+    done
+    cd - >/dev/null
+}
+
+list_processors() {
+    cd templates/post-processors
+    for processor in *.json; do
+        printf "${processor%.json}\n"
+    done
+    cd - >/dev/null
+}
+
+TEMPLATE=${1:-}
+VAGRANT_CLOUD_TOKEN=${VAGRANT_CLOUD_TOKEN:-}
+
+if [ -z "${TEMPLATE}" ]; then
+    printf "Availables templates :\n" 
+    list_templates
+    printf "\nAvailables processors :\n" 
+    list_processors
+    printf "\nYou must run : ${0} <template> <processor>\n"
+fi
+
+[ -f "ansible/${TEMPLATE}.yml" ] || error "${TEMPLATE} is not a valid Ansible playbook !"
+[ -f "vars/${TEMPLATE}.json" ] || error "${TEMPLATE} does not have a variables files !"
+
+ANSIBLE_VERSION=$(jq ".ansible_version" "vars/${TEMPLATE}.json"|tr -d '"')
+ROLES_VERSION=$(jq ".roles_version" "vars/${TEMPLATE}.json"|tr -d '"')
+
+if [ -z "${VAGRANT_CLOUD_TOKEN}" ]; then
+    variables=$(jq "." "vars/${TEMPLATE}.json")
+    postprocessors=$(jq --slurp "." templates/post-processors/vagrant.json)
+else
+    variables=$(jq --slurp add "vars/${TEMPLATE}.json" templates/variables/vagrant-cloud.json)
+    postprocessors=$(jq --slurp "." templates/post-processors/vagrant.json templates/post-processors/vagrant-cloud.json | jq --slurp ".")
+fi
+
+builders=$(jq -s "." templates/builders/qemu.json)
+
+cat <<EOF | jq .
+{
+  "variables": ${variables}
+  ,"builders": ${builders}
+  ,"provisioners": [
+    {
+      "type": "shell"
+      ,"execute_command": "sudo env {{ .Vars }} {{ .Path }}"
+      ,"scripts": ["scripts/ansible_install_pip", "scripts/ansible_roles_galaxy"]
+      ,"environment_vars": ["ANSIBLE_VERSION=${ANSIBLE_VERSION}", "ROLES_VERSION=${ROLES_VERSION}"]
+    }
+    ,{
+      "type": "ansible-local"
+      ,"command": ". /tmp/venv/bin/activate && ANSIBLE_FORCE_COLOR=1 PYTHONUNBUFFERED=1 ansible-playbook"
+      ,"playbook_file": "./ansible/{{ user \`box_name\` }}.yml"
+    }
+    ,{
+      "type": "shell"
+      ,"execute_command": "sudo env {{ .Vars }} {{ .Path }}"
+      ,"scripts": ["scripts/vagrant", "scripts/cleanup"]
+    }
+  ]
+  ,"post-processors": ${postprocessors}
+}
+EOF

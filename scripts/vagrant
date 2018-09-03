@@ -1,0 +1,10 @@
+#!/bin/sh
+
+set -eu
+
+useradd --uid 1000 --user-group --create-home vagrant
+usermod -G sudo vagrant
+umask 0077
+mkdir /home/vagrant/.ssh
+wget --output-document=/home/vagrant/.ssh/authorized_keys 'https://raw.githubusercontent.com/hashicorp/vagrant/master/keys/vagrant.pub'
+chown --recursive vagrant:vagrant /home/vagrant/.ssh

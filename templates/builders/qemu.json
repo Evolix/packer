@@ -1,0 +1,29 @@
+{
+    "type": "qemu",
+    "format": "qcow2",
+    "headless": false,
+    "accelerator": "kvm",
+    "qemuargs": [
+        [ "-m", "2048M" ],
+        [ "-smp", "4" ]
+    ],
+    "net_device": "virtio-net",
+    "disk_interface": "virtio",
+    "vm_name": "{{ user `box_name` }}-{{ user `roles_version` }}-{{ user `box_revision` }}-amd64",
+    "iso_url": "https://cdimage.debian.org/debian-cd/{{ user `debian_version` }}/amd64/iso-cd/debian-{{ user `debian_version` }}-amd64-netinst.iso",
+    "iso_checksum": "{{ user `debian_sha256` }}",
+    "iso_checksum_type": "sha256",
+    "disk_size": 10240,
+    "output_directory": "build/qemu",
+    "ssh_username": "packer",
+    "ssh_password": "packer",
+    "ssh_wait_timeout": "10000s",
+    "boot_wait": "1s",
+    "http_directory": "preseed",
+    "boot_command": [
+        "<esc><wait>",
+        "auto url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg net.ifnames=0 biosdevname=0 <wait>",
+        "<enter><wait>"
+    ],
+    "shutdown_command": "sudo shutdown -P now"
+}

@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -eu
+
+ANSIBLE_VERSION="${ROLES_VERSION:-stable}"
+
+. /tmp/venv/bin/activate && trap "deactivate" 0
+
+ansible-galaxy install -p /etc/ansible "git+https://forge.evolix.org/ansible-roles.git,${ROLES_VERSION},roles"

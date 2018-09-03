@@ -1,0 +1,26 @@
+---
+- hosts: all
+  gather_facts: yes
+  become: yes
+
+  vars:
+    evolinux_hostname: "packmail"
+    evolinux_domain: "example.com"
+    evolinux_fqdn: "{{ evolinux_hostname }}.{{ evolinux_domain }}"
+    evomaintenance_alert_email: "evomaintenance-{{ evolinux_hostname }}@example.com"
+    evolinux_evomaintenance_include: False
+    evolinux_fstab_include: False
+    evolinux_hardware_include: False
+    evolinux_log2mail_include: False
+    evolinux_minifirewall_include: False
+    evolinux_listupgrade_include: False
+    evolinux_generateldif_include: False
+    evoadminmail_contact_email: "postmaster@example.com"
+
+  roles:
+    - evolix/evolinux-base
+    - { role: evolix/postfix, postfix_packmail: True, postfix_force_main_cf: True }
+    - evolix/apache
+    - { role: evolix/php, php_apache_enable: True }
+    - { role: evolix/webapps/evoadmin-mail }
+    - { role: evolix/webapps/roundcube }
