@@ -2,5 +2,8 @@
 
 set -eu
 
+DEBIAN_FRONTEND=noninteractive apt-get -yq purge $(dpkg-query -W -f='${binary:Package}\n' 'linux-image-4*' 'linux-headers-4*' | grep -v $(uname -r))
+
 DEBIAN_FRONTEND=noninteractive apt-get -yq clean
+
 chsh --shell '/usr/sbin/nologin' packer

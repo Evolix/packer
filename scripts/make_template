@@ -69,6 +69,11 @@ cat <<EOF | jq .
     ,{
       "type": "shell"
       ,"execute_command": "sudo env {{ .Vars }} {{ .Path }}"
+      ,"inline": ["reboot"]
+    }
+    ,{
+      "type": "shell"
+      ,"execute_command": "sudo env {{ .Vars }} {{ .Path }}"
       ,"scripts": ["scripts/vagrant", "scripts/cleanup"]
     }
   ]
