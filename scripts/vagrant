@@ -2,7 +2,7 @@
 
 set -eu
 
-useradd --uid 1000 --user-group --create-home vagrant
+useradd --uid 1000 --user-group --create-home --shell /bin/bash vagrant
 usermod -G sudo vagrant
 umask 0077
 mkdir /home/vagrant/.ssh
