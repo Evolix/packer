@@ -2,12 +2,12 @@
 
 set -eu
 
-ANSIBLE_VERSION="${ANSIBLE_VERSION:-stable-2.2}"
+ANSIBLE_VERSION="${ANSIBLE_VERSION:-2.2.1.0}"
 
 DEBIAN_FRONTEND=noninteractive apt-get -yq install build-essential python-dev python-virtualenv git
 
 [ ! -f "/tmp/venv/bin/activate" ] && virtualenv /tmp/venv
 
-[ ! -x "/tmp/venv/bin/ansible" ] && . /tmp/venv/bin/activate && pip install "git+https://github.com/ansible/ansible.git@${ANSIBLE_VERSION}"
+. /tmp/venv/bin/activate && trap "deactivate" 0
 
-exit 0
+pip install "ansible==${ANSIBLE_VERSION}"
