@@ -1,0 +1,23 @@
+---
+- hosts: all
+  gather_facts: yes
+  become: yes
+
+  vars:
+    evolinux_hostname: "packweb"
+    evolinux_domain: "example.com"
+    evolinux_fqdn: "{{ evolinux_hostname }}.{{ evolinux_domain }}"
+    evomaintenance_alert_email: "evomaintenance-{{ evolinux_hostname }}@example.com"
+    evolinux_evomaintenance_include: False
+    evolinux_fstab_include: False
+    evolinux_hardware_include: False
+    evolinux_log2mail_include: False
+    evolinux_minifirewall_include: False
+    evolinux_listupgrade_include: False
+    evolinux_generateldif_include: False
+    evoadmin_host: "evoadmin.{{ evolinux_hostname }}.example.com"
+    evoadmin_contact_email: "evoadmin@example.com"
+
+  roles:
+    - evolix/evolinux-base
+    - evolix/packweb-apache

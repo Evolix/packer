@@ -8,5 +8,8 @@ evolinux:
 packmail:
 	./scripts/make_template packmail | PACKER_CACHE_DIR='build/packer' packer build -
 
+packweb:
+	./scripts/make_template packweb | PACKER_CACHE_DIR='build/packer' packer build -
+
 clean:
 	rm -rf build/*
