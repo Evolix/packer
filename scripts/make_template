@@ -16,6 +16,7 @@ list_templates() {
 }
 
 TEMPLATE=${1:-}
+HEADLESS=${HEADLESS:-false}
 VAGRANT_CLOUD_ID=${VAGRANT_CLOUD_ID:-evolix}
 VAGRANT_CLOUD_TOKEN=${VAGRANT_CLOUD_TOKEN:-}
 
@@ -39,7 +40,7 @@ cat <<EOF
     {
       "type": "qemu",
       "format": "qcow2",
-      "headless": false,
+      "headless": ${HEADLESS},
       "accelerator": "kvm",
       "qemuargs": [
           [ "-m", "2048M" ],
