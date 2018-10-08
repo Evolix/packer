@@ -1,4 +1,0 @@
-{
-    "cloud_id": "{{ env `VAGRANT_CLOUD_ID` }}"
-    ,"cloud_token": "{{ env `VAGRANT_CLOUD_TOKEN` }}"
-}

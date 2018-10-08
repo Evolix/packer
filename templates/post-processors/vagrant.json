@@ -1,6 +1,0 @@
-{
-    "type": "vagrant",
-    "compression_level": "9",
-    "output": "build/vagrant/{{ user `box_name` }}-{{ user `roles_version` }}-{{ user `box_revision` }}-amd64_{{.Provider}}.box",
-    "only": ["qemu"]
-}

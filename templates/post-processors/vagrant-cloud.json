@@ -1,8 +1,0 @@
-{
-    "type": "vagrant-cloud",
-    "box_tag": "{{ user `cloud_id` }}/{{ user `box_name` }}",
-    "no_release": true,
-    "access_token": "{{ user `cloud_token` }}",
-    "version": "{{ user `roles_version` }}-{{ user `box_revision` }}",
-    "version_description": "* use Debian {{ user `debian_version` }} for base system\n * use [Ansible](https://www.ansible.com/) version {{ user `ansible_version` }}\n* use [ansible-roles {{ user `roles_version` }}](https://github.com/Evolix/ansible-roles/tree/{{ user `roles_version` }}), see [CHANGELOG](https://github.com/Evolix/ansible-roles/blob/stable/CHANGELOG.md) for details"
-}

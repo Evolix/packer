@@ -15,23 +15,15 @@ list_templates() {
     cd - >/dev/null
 }
 
-list_processors() {
-    cd templates/post-processors
-    for processor in *.json; do
-        printf "${processor%.json}\n"
-    done
-    cd - >/dev/null
-}
-
 TEMPLATE=${1:-}
+VAGRANT_CLOUD_ID=${VAGRANT_CLOUD_ID:-evolix}
 VAGRANT_CLOUD_TOKEN=${VAGRANT_CLOUD_TOKEN:-}
 
 if [ -z "${TEMPLATE}" ]; then
     printf "Availables templates :\n" 
     list_templates
-    printf "\nAvailables processors :\n" 
-    list_processors
-    printf "\nYou must run : ${0} <template> <processor>\n"
+    printf "\nYou must run : ${0} <template>\n"
+    exit 0
 fi
 
 [ -f "ansible/${TEMPLATE}.yml" ] || error "${TEMPLATE} is not a valid Ansible playbook !"
@@ -40,20 +32,40 @@ fi
 ANSIBLE_VERSION=$(jq ".ansible_version" "vars/${TEMPLATE}.json"|tr -d '"')
 ROLES_VERSION=$(jq ".roles_version" "vars/${TEMPLATE}.json"|tr -d '"')
 
-if [ -z "${VAGRANT_CLOUD_TOKEN}" ]; then
-    variables=$(jq "." "vars/${TEMPLATE}.json")
-    postprocessors=$(jq --slurp "." templates/post-processors/vagrant.json)
-else
-    variables=$(jq --slurp add "vars/${TEMPLATE}.json" templates/variables/vagrant-cloud.json)
-    postprocessors=$(jq --slurp "." templates/post-processors/vagrant.json templates/post-processors/vagrant-cloud.json | jq --slurp ".")
-fi
-
-builders=$(jq -s "." templates/builders/qemu.json)
-
-cat <<EOF | jq .
+cat <<EOF
 {
-  "variables": ${variables}
-  ,"builders": ${builders}
+  "variables": $(jq "." "vars/${TEMPLATE}.json")
+  ,"builders": [
+    {
+      "type": "qemu",
+      "format": "qcow2",
+      "headless": false,
+      "accelerator": "kvm",
+      "qemuargs": [
+          [ "-m", "2048M" ],
+          [ "-smp", "4" ]
+      ],
+      "net_device": "virtio-net",
+      "disk_interface": "virtio",
+      "vm_name": "{{ user \`box_name\` }}-{{ user \`roles_version\` }}-{{ user \`box_revision\` }}-amd64",
+      "iso_url": "https://cdimage.debian.org/debian-cd/{{ user \`debian_version\` }}/amd64/iso-cd/debian-{{ user \`debian_version\` }}-amd64-netinst.iso",
+      "iso_checksum": "{{ user \`debian_sha256\` }}",
+      "iso_checksum_type": "sha256",
+      "disk_size": 10240,
+      "output_directory": "build/qemu",
+      "ssh_username": "packer",
+      "ssh_password": "packer",
+      "ssh_wait_timeout": "10000s",
+      "boot_wait": "1s",
+      "http_directory": "preseed",
+      "boot_command": [
+          "<esc><wait>",
+          "auto url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg net.ifnames=0 biosdevname=0 <wait>",
+          "<enter><wait>"
+      ],
+      "shutdown_command": "sudo shutdown -P now"
+    }
+  ]
   ,"provisioners": [
     {
       "type": "shell"
@@ -77,6 +89,25 @@ cat <<EOF | jq .
       ,"scripts": ["scripts/vagrant", "scripts/cleanup"]
     }
   ]
-  ,"post-processors": ${postprocessors}
+  ,"post-processors": [[
+    {
+      "type": "vagrant",
+      "compression_level": "9",
+      "output": "build/vagrant/{{ user \`box_name\` }}-{{ user \`roles_version\` }}-{{ user \`box_revision\` }}-amd64_{{.Provider}}.box",
+      "only": ["qemu"]
+    }
+EOF
+[ -n "${VAGRANT_CLOUD_TOKEN}" ] && cat <<EOF
+    ,{
+      "type": "vagrant-cloud",
+      "box_tag": "${VAGRANT_CLOUD_ID}/{{ user \`box_name\` }}",
+      "no_release": true,
+      "access_token": "${VAGRANT_CLOUD_TOKEN}",
+      "version": "{{ user \`roles_version\` }}-{{ user \`box_revision\` }}",
+      "version_description": "* use Debian {{ user \`debian_version\` }} for base system\n * use [Ansible](https://www.ansible.com/) version {{ user \`ansible_version\` }}\n* use [ansible-roles {{ user \`roles_version\` }}](https://github.com/Evolix/ansible-roles/tree/{{ user \`roles_version\` }}), see [CHANGELOG](https://github.com/Evolix/ansible-roles/blob/stable/CHANGELOG.md) for details"
+    }
+EOF
+cat <<EOF
+  ]]
 }
 EOF
