@@ -21,7 +21,7 @@ Vagrant.configure('2') do |config|
 
   templates.each do |template|
     config.vm.define "#{template['box_name']}" do |node|
-      node.vm.hostname = "#{template['box_name']}-#{template['roles_version']}"
+      node.vm.hostname = "#{template['box_name']}-#{template['roles_version']}.example.com"
       node.vm.box = "debian/stretch64"
       node.vm.box_version = "#{template['debian_version']}"
 
