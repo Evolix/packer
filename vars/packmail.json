@@ -3,6 +3,6 @@
     ,"ansible_version": "2.2.1.0"
     ,"roles_version": "9.4.1"
     ,"box_revision": "1"
-    ,"debian_version": "9.5.0"
-    ,"debian_sha256": "1f97a4b8dee7c3def5cd8215ff01b9edef27c901b28fa8b1ef4f022eff7c36c2"
+    ,"debian_version": "9.6.0"
+    ,"debian_sha256": "c51d84019c3637ae9d12aa6658ea8c613860c776bd84c6a71eaaf765a0dd60fe"
 }
