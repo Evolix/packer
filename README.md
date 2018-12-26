@@ -6,8 +6,8 @@ by [Evolix](https://evolix.com/).
 
 ## Dependencies
 
-make(1), (packer)[https://www.packer.io/] and
-(jq)[https://stedolan.github.io/jq/], on Debian you can install
+make(1), [packer](https://www.packer.io/) and
+[jq](https://stedolan.github.io/jq/), on Debian you can install
 them with :
 
 ~~~
