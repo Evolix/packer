@@ -2,7 +2,7 @@
 
 set -eu
 
-ANSIBLE_VERSION="${ROLES_VERSION:-stable}"
+ROLES_VERSION="${ROLES_VERSION:-stable}"
 
 . /tmp/venv/bin/activate && trap "deactivate" 0
 
